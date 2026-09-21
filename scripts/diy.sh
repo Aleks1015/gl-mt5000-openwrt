@@ -11,18 +11,11 @@ BOARDD=target/linux/mediatek/filogic/base-files/etc/board.d/02_network
 FILOGIC_MK=target/linux/mediatek/image/filogic.mk
 KCFG=target/linux/mediatek/filogic/config-6.12
 
-# --- 1. Graft the single GL device-support commit (PR #24237 head) ---------
-echo ">> Grafting GL-MT5000 device support (PR #24237) onto openwrt-25.12"
-git config user.email build@local
-git config user.name mt5000-build
-git remote add glinet "${GL_DEVICE_COMMIT:-https://github.com/GLiNet-Tech/openwrt.git}" 2>/dev/null || true
-# depth>=2 so cherry-pick has the commit's PARENT as a merge base; with depth 1
-# git lacks the base and treats the whole tree as add/add conflicts.
-git fetch --depth 3 glinet mt5000
-git cherry-pick -n FETCH_HEAD || { echo ">> ERROR: graft cherry-pick failed (openwrt-25.12 drift?)"; git cherry-pick --abort 2>/dev/null || true; exit 1; }
-test -f target/linux/mediatek/dts/mt7987a-gl-mt5000.dts || { echo ">> ERROR: DTS missing after graft"; exit 1; }
-grep -q "glinet_gl-mt5000" "$FILOGIC_MK" || { echo ">> ERROR: device recipe missing after graft"; exit 1; }
-echo ">> graft OK"
+# --- 1. Validating support for GL-MT5000 ---------
+echo ">> Verifying GL-MT5000 device support (PR #24237)"
+test -f target/linux/mediatek/dts/mt7987a-gl-mt5000.dts || { echo ">> ERROR: DTS missing in PR"; exit 1; }
+grep -q "glinet_gl-mt5000" "$FILOGIC_MK" || { echo ">> ERROR: device recipe missing in PR"; exit 1; }
+echo ">> Device support verified"
 
 # --- 2. swconfig -> DSA ----------------------------------------------------
 echo ">> Converting RTL8366UB swconfig driver -> DSA (kernel 6.12 API)"
