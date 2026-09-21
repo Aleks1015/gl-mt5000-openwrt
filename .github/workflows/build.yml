@@ -8,7 +8,7 @@ env:
   REPO_BRANCH: openwrt-25.12
   GL_DEVICE_COMMIT: https://github.com/GLiNet-Tech/openwrt.git
   OPENWRT_PATH: /mnt/openwrt
-  TZ: Europe/Lisbon
+  TZ: America/Toronto
 
 jobs:
   build:
@@ -35,9 +35,11 @@ jobs:
         run: |
           sudo mkdir -p "$OPENWRT_PATH"
           sudo chown "$USER:$USER" "$OPENWRT_PATH"
-          git clone --depth 1 -b "$REPO_BRANCH" "$REPO_URL" "$OPENWRT_PATH"
+          git clone "$REPO_URL" "$OPENWRT_PATH"
           cd "$OPENWRT_PATH"
-          echo "HEAD: $(git rev-parse --short HEAD) on $REPO_BRANCH"
+          git fetch origin pull/24237/head:pr-mt5000
+          git checkout pr-mt5000
+          echo "HEAD: $(git rev-parse --short HEAD) on PR 24237"
 
       - name: Cache downloads & ccache
         uses: actions/cache@v4
