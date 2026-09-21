@@ -19,6 +19,7 @@ echo ">> Device support verified"
 
 # --- 2. swconfig -> DSA ----------------------------------------------------
 echo ">> Converting RTL8366UB swconfig driver -> DSA (kernel 6.12 API)"
+mkdir -p $RTLPKG/src
 
 # Ported DSA driver + build the DSA object instead of the swconfig one
 cp "$WORKSPACE/files/dsa/rtl8366ub_dsa.c" "$RTLPKG/src/rtl8366ub_dsa.c"
