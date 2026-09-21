@@ -23,11 +23,14 @@ mkdir -p $RTLPKG/src
 
 # Ported DSA driver + build the DSA object instead of the swconfig one
 cp "$WORKSPACE/files/dsa/rtl8366ub_dsa.c" "$RTLPKG/src/rtl8366ub_dsa.c"
-sed -i 's#^rtl8366ub-y += rtl8366ub_mdio.o#rtl8366ub-y += rtl8366ub_dsa.o#' "$RTLPKG/src/Makefile"
-sed -i '/^rtl8366ub-y += rtl8366ub_dsa.o/a rtl8366ub-y += l2.o' "$RTLPKG/src/Makefile"
 
-# Drop the swconfig package dependency (DSA core + tagger are in-kernel)
-sed -i 's#DEPENDS:=@TARGET_mediatek +kmod-swconfig#DEPENDS:=@TARGET_mediatek#' "$RTLPKG/Makefile"
+cat << 'EOF' > "$RTLPKG/src/Makefile"
+obj-m += rtl8366ub.o
+rtl8366ub-y += rtl8366ub_dsa.o l2.o
+EOF
+
+# Drop the swconfig package dependency by providing a clean DSA Makefile
+cp "$WORKSPACE/files/dsa/Makefile" "$RTLPKG/Makefile"
 
 # Scrub swconfig leftovers ONLY from the gl-mt5000 recipe (do NOT touch other
 # devices' recipes that legitimately use swconfig, e.g. mercusys_mr85x)
